@@ -3,6 +3,7 @@ package producerid;
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -11,6 +12,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -28,45 +30,59 @@ public class Producer {
 	//Variables Globales
 	Connection conn = null;
 	String consola = "Hello World! by PA --- <BR> MicroservicioA";
+	long contador = 0;
 	
 	@RequestMapping("/")
-	String home() {
+	String home(@RequestParam(value="pNumero", defaultValue="1") long pNumero) {
 		
 		try {
 			if (conn == null){
 				conn = ProducerConnection.getConnection();
 				consola += "<BR>==> CONEXION ESTABLECIDA: " + conn.toString();
 			}
-			else{
-				sendMessage2Q();
+			
+			while(contador < pNumero){
+				contador++;
+				sendMessage2Q(contador);
 			}
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		finally{
+			try {
+				conn.stop();
+				conn.close();
+			} catch (JMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 		
 		return consola;
 	}
 
+	
+	/*******************************************
+	 * MAIN                                    *
+	 * @param args                             *
+	 * @throws Exception  
+	 * @author pedro.alonso.garcia                     *
+	 ******************************************/
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(Producer.class, args);
 	}
 
 	
-	 
-//	    public static void main(String[] args) throws Exception {
-//	        thread(new ProducerThread(), false);
-//
-//	    }
-	 
-//	    public static void thread(Runnable runnable, boolean daemon) {
-//	        Thread brokerThread = new Thread(runnable);
-//	        brokerThread.setDaemon(daemon);
-//	        brokerThread.start();
-//	    }
-	 
-    private void sendMessage2Q() {
+	/**
+	 * Método que envía el mensaje 
+	 * @param idMessage
+	 * @author pedro.alonso.garcia
+	 */
+    private void sendMessage2Q(long idMessage) {
         try {
 	                
 	            	
@@ -75,17 +91,17 @@ public class Producer {
                 Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
  
                 // Create the destination (Topic or Queue)
-            Destination destination = session.createQueue("TEST.HELLOW");
+            Destination destination = session.createQueue("TEST.MECCANO");
  
                 // Create a MessageProducer from the Session to the Topic or Queue
                 MessageProducer producer = session.createProducer(destination);
                 producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
  
                 // Create a messages
-            String text = "Hello world! From: " + Thread.currentThread().getName() + " : " + this.hashCode();
+            String text = "Hello world! From: " + idMessage + " : " + this.hashCode();
                 TextMessage message = session.createTextMessage(text);
                 
-            String logMessage = "Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName();
+            String logMessage = "@@@ "+ idMessage + " @@@ -- Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName();
  
                 // Tell the producer to send the message
             System.out.println(logMessage);
@@ -102,7 +118,7 @@ public class Producer {
         catch (Exception e) {
             System.out.println("Caught: " + e);
             e.printStackTrace();
-            consola += "<BR>###>>ERROR ENVIO: " + e.toString();
+            consola += "<BR>###>>ERROR ENVIO: @@@ "+ idMessage + " @@@ -- " + e.toString();
         }
     }
 	    
