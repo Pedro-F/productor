@@ -3,7 +3,6 @@ package producerid;
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
-import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -29,43 +28,59 @@ public class Producer {
 	
 	//Variables Globales
 	Connection conn = null;
+	Session session=null;
+	MessageProducer producer=null;
 	String consola = "Hello World! by PA --- <BR> MicroservicioA";
-	long contador = 0;
+	//long contador = 0;
 	
 	@RequestMapping("/")
-	String home(@RequestParam(value="pNumero", defaultValue="1") long pNumero) {
+	String home(@RequestParam(value="pNumero", defaultValue="1") String pNumero) {
 		
 		try {
 			if (conn == null){
-				conn = ProducerConnection.getConnection();
-				consola += "<BR>==> CONEXION ESTABLECIDA: " + conn.toString();
+				init();
 			}
-			
-			while(contador < pNumero){
-				contador++;
-				sendMessage2Q(contador);
-			}
-			
+
+				sendMessage2Q(pNumero);
+	
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		finally{
-			try {
-				conn.stop();
-				conn.close();
-			} catch (JMSException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+		finally{		
 		}
 		
 		return consola;
 	}
 
 	
+	private void init() {
+		// TODO Auto-generated method stub
+		
+		conn = ProducerConnection.getConnection();
+		consola += "<BR>==> CONEXION ESTABLECIDA: " + conn.toString();
+		
+		try{
+			// Create a Session
+            Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+            // Create the destination (Topic or Queue)
+            Destination destination = session.createQueue("TEST.MECCANO");
+
+            // Create a MessageProducer from the Session to the Topic or Queue
+            MessageProducer producer = session.createProducer(destination);
+            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+		
+		 }
+	    catch (Exception e) {
+        System.out.println("Init Caught: " + e);
+        e.printStackTrace();
+ 
+    }
+	}
+
+
 	/*******************************************
 	 * MAIN                                    *
 	 * @param args                             *
@@ -82,38 +97,20 @@ public class Producer {
 	 * @param idMessage
 	 * @author pedro.alonso.garcia
 	 */
-    private void sendMessage2Q(long idMessage) {
-        try {
-	                
-	            	
-	 
-            // Create a Session
-                Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
- 
-                // Create the destination (Topic or Queue)
-            Destination destination = session.createQueue("TEST.MECCANO");
- 
-                // Create a MessageProducer from the Session to the Topic or Queue
-                MessageProducer producer = session.createProducer(destination);
-                producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
- 
-                // Create a messages
+    private void sendMessage2Q(String idMessage) {
+        try {         
+            // Create a messages
             String text = "Hello world! From: " + idMessage + " : " + this.hashCode();
-                TextMessage message = session.createTextMessage(text);
+            TextMessage message = session.createTextMessage(text);
                 
             String logMessage = "@@@ "+ idMessage + " @@@ -- Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName();
  
-                // Tell the producer to send the message
+            // Tell the producer to send the message
             System.out.println(logMessage);
             consola += "<BR>==> START ENVIO: " + logMessage;
             
             producer.send(message);
-            
-            consola += "<BR>==> **END ENVIO: " + logMessage;
- 
-                // Clean up
-            session.close();
-//	                connection.close();
+             
         }
         catch (Exception e) {
             System.out.println("Caught: " + e);
