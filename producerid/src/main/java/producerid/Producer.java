@@ -28,8 +28,8 @@ public class Producer {
 	
 	//Variables Globales
 	Connection conn = null;
-	Session session=null;
-	MessageProducer producer=null;
+	Session session = null;
+	MessageProducer producer = null;
 	String consola = "Hello World! by PA --- <BR> MicroservicioA";
 	//long contador = 0;
 	
@@ -63,13 +63,13 @@ public class Producer {
 		
 		try{
 			// Create a Session
-            Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+			session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
             // Create the destination (Topic or Queue)
             Destination destination = session.createQueue("TEST.MECCANO");
 
             // Create a MessageProducer from the Session to the Topic or Queue
-            MessageProducer producer = session.createProducer(destination);
+            producer = session.createProducer(destination);
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 		
 		 }
@@ -100,7 +100,7 @@ public class Producer {
     private void sendMessage2Q(String idMessage) {
         try {         
             // Create a messages
-            String text = "Hello world! From: " + idMessage + " : " + this.hashCode();
+            String text = "Hello world! From: " + idMessage + " %%%%%%%%";
             TextMessage message = session.createTextMessage(text);
                 
             String logMessage = "@@@ "+ idMessage + " @@@ -- Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName();

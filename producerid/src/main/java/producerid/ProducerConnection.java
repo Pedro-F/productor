@@ -14,7 +14,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 		try {
             
         	// Create a ConnectionFactory
-            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://172.30.217.249:61616");
+            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://172.30.78.89:61616");
 
             // Create a Connection
             connection = connectionFactory.createConnection("user","password");
