@@ -137,7 +137,7 @@ public class Producer {
             
             TextMessage message = session.createTextMessage(text);
                 
-            String logMessage = "@@@ "+ idMessage + " @@@ -- Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName();
+            String logMessage = "@@@ "+ idMessage + " @@@ -- Sent message: "+ text;
  
             // Tell the producer to send the message
             System.out.println(logMessage);
