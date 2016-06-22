@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 
 @RestController
 @EnableAutoConfiguration
@@ -34,16 +37,43 @@ public class Producer {
 	//long contador = 0;
 	
 	@RequestMapping("/")
-	String home(@RequestParam(value="pNumero", defaultValue="1") String pNumero) {
+	//String home(@RequestParam(value="pNumero", defaultValue="1") String pNumero) {
+		String home(@RequestParam(value="id", defaultValue="SIN PARAMETRO") String id,
+					@RequestParam(value="size", defaultValue="1") String size,
+					@RequestParam(value="init", defaultValue="1") String init) {
+		
+		int inicio;
+		int tamanio;
 		
 		try {
 			if (conn == null){
 				init();
 			}
-
-				sendMessage2Q(pNumero);
-	
+			try{
+				tamanio = Integer.parseInt(size);
+			}
+			catch(Exception e){
+				tamanio = 1;
+			}
+			try{
+				inicio = Integer.parseInt(init);
+			}
+			catch(Exception e){
+				inicio = 1;
+			}
 			
+			if (inicio == 1 && tamanio == 1){
+				sendMessage2Q(id);
+			}
+			else{
+				tamanio = tamanio + inicio;
+				while(inicio<=tamanio){
+					
+					sendMessage2Q("" + inicio);
+					inicio++;
+				}
+			}
+				
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,7 +130,12 @@ public class Producer {
     private void sendMessage2Q(String idMessage) {
         try {         
             // Create a messages
-            String text = "Hello world! From: " + idMessage + " %%%%%%%%";
+            
+            Evento myEvent = new Evento(idMessage);
+            
+            Gson gson = new GsonBuilder().create();
+            String text = gson.toJson(myEvent);
+            
             TextMessage message = session.createTextMessage(text);
                 
             String logMessage = "@@@ "+ idMessage + " @@@ -- Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName();
