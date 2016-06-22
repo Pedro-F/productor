@@ -33,7 +33,7 @@ public class Producer {
 	Connection conn = null;
 	Session session = null;
 	MessageProducer producer = null;
-	String consola = "Hello World! by PA --- <BR> MicroservicioA";
+	
 	//long contador = 0;
 	
 	@RequestMapping("/")
@@ -81,7 +81,7 @@ public class Producer {
 		finally{		
 		}
 		
-		return consola;
+		return "<strong>Productor</strong> <br>Listo para enviar mensajes ...</br>";
 	}
 
 	
@@ -89,7 +89,6 @@ public class Producer {
 		// TODO Auto-generated method stub
 		
 		conn = ProducerConnection.getConnection();
-		consola += "<BR>==> CONEXION ESTABLECIDA: " + conn.toString();
 		
 		try{
 			// Create a Session
@@ -142,7 +141,6 @@ public class Producer {
  
             // Tell the producer to send the message
             System.out.println(logMessage);
-            consola += "<BR>==> START ENVIO: " + logMessage;
             
             producer.send(message);
              
@@ -150,7 +148,7 @@ public class Producer {
         catch (Exception e) {
             System.out.println("Caught: " + e);
             e.printStackTrace();
-            consola += "<BR>###>>ERROR ENVIO: @@@ "+ idMessage + " @@@ -- " + e.toString();
+           
         }
     }
 	    
